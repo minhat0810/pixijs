@@ -1,0 +1,14 @@
+{ "columns":11,
+ "image":"Multi_Platformer_Tileset_Free\/GrassLand\/Terrain\/Grassland_Terrain_Tileset.png",
+ "imageheight":128,
+ "imagewidth":176,
+ "margin":0,
+ "name":"Grassland_Terrain_Tileset",
+ "spacing":0,
+ "tilecount":88,
+ "tiledversion":"1.11.2",
+ "tileheight":16,
+ "tilewidth":16,
+ "type":"tileset",
+ "version":"1.10"
+}

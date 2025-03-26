@@ -1,0 +1,44 @@
+{
+    "activeFile": "map_level_1.json",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "Grassland_Terrain_Tileset.json": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "map_level_1.json": {
+            "scale": 0.42651041666666667,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 899.1574062767127,
+                "y": 359.8974233728171
+            }
+        },
+        "untitled.tmx": {
+            "scale": 0.595234375,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 960.1260007875048,
+                "y": 358.682241764011
+            }
+        }
+    },
+    "last.exportedFilePath": "D:/PIXI_TRAINING/pixijs/PIXI/pixi-project/public/assets/maps",
+    "last.imagePath": "D:/PIXI_TRAINING/pixijs/PIXI/pixi-project/public/assets/maps/Multi_Platformer_Tileset_Free/GrassLand/Terrain",
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "tmx",
+    "openFiles": [
+        "untitled.tmx",
+        "map_level_1.json",
+        "Grassland_Terrain_Tileset.json"
+    ],
+    "project": "map2.tiled-project",
+    "recentFiles": [
+        "untitled.tmx",
+        "Grassland_Terrain_Tileset.json",
+        "map_level_1.json"
+    ],
+    "tileset.lastUsedFormat": "json"
+}
