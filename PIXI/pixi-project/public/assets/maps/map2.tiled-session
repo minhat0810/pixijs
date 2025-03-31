@@ -5,15 +5,15 @@
     ],
     "fileStates": {
         "Grassland_Terrain_Tileset.json": {
-            "scaleInDock": 1,
+            "scaleInDock": 2,
             "scaleInEditor": 1
         },
         "map_level_1.json": {
-            "scale": 0.42651041666666667,
+            "scale": 0.33,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 899.1574062767127,
-                "y": 359.8974233728171
+                "x": 809.090909090909,
+                "y": 1165.151515151515
             }
         },
         "untitled.tmx": {

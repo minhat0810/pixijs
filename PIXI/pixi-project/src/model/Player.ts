@@ -1,4 +1,7 @@
 import { AnimatedSprite, Application, Assets, Container, Graphics, Sprite, Spritesheet } from "pixi.js";
+import RectCollider from "../handle/RectCollider";
+import { CollisionManager } from "../handle/CollisionManager";
+import { Collider } from "../handle/Collider";
 
 export class Player extends Container {
     public idleSprite!  : Sprite;
@@ -10,7 +13,7 @@ export class Player extends Container {
     public  isAttacking : boolean = false;
     private isMoving    : boolean = false;
     private isJumping   : boolean = false;
-    private isPunch     : boolean = false;
+//    private isPunch     : boolean = false;
     private attackType  : "none" | "punch" | "kame1" | "slash" = "none";
 
     private velocityY   : number = 0;
@@ -22,16 +25,27 @@ export class Player extends Container {
     private border!     : Graphics;
     
     private app         : Application;
+    public  collider!    : RectCollider;
+    private collisionManager! : CollisionManager;
+    private mapWidth    : number;
 
-    constructor(app: Application) {
+    constructor(app: Application, collisionManager: CollisionManager,mapWidth: number) {
         super();
         this.app = app;
-        
+        this.collisionManager = collisionManager;
+        this.mapWidth = mapWidth;
         this.init().then(() => {
             console.log("Player initialized.");
         }).catch((error) => {
             console.error("Error initializing player:", error);
         });
+        
+      
+        
+       // this.collisionManager = new CollisionManager();
+        // this.collisionManager.addCollider(this.collider);
+       // console.log(this.getBounds());
+        
     }
     private async init() {
         const spritesheet = await Assets.load("/assets/image/player/player.json");
@@ -39,8 +53,9 @@ export class Player extends Container {
         
         this.idleSprite = new Sprite(spritesheet.textures["move_0"]);
         
+        
         this.idleSprite.anchor.set(0.5);
-        this.idleSprite.scale.set(1.7 , 1.7) ;
+        this.idleSprite.scale.set(3.0 , 1.7) ;
         this.idleSprite.x = 0; 
         // console.log(this.idleSprite.x , this.idleSprite.y);
         
@@ -61,15 +76,16 @@ export class Player extends Container {
         this.spriteKame1(spritesheet as Spritesheet);
 
         
-        this.border = new Graphics();
-        this.addChild(this.border);
-        this.drawBorder(this.idleSprite);
+        // this.border = new Graphics();
+        // this.addChild(this.border);
+        // this.drawBorder(this.idleSprite);
 
-        this.groundY = 410; 
-        this.position.set(100, this.app.screen.height/2);
-        console.log(this.position);
+        this.groundY = 405; 
+        this.position.set(20, this.groundY);
+       // console.log();
         
 
+        
     }
     private drawBorder(sprite: Sprite | AnimatedSprite) {
         this.border.clear();
@@ -81,6 +97,14 @@ export class Player extends Container {
             sprite.height
         );
     }
+    private hideAllSprites() {
+        this.idleSprite.visible = false;
+        this.runSprite.visible = false;
+        this.jumpSprite.visible = false;
+        this.punchSprite.visible = false;
+        this.kame1Sprite.visible = false;
+    }
+
 
     private spriteRun(spritesheet : Spritesheet){
          const frames = [];
@@ -149,10 +173,11 @@ export class Player extends Container {
         this.direction = direction;
         // Lật sprite theo hướng chạy
         this.runSprite.scale.set(Math.abs(this.runSprite.scale.x) * direction, this.runSprite.scale.y); 
+        this.hideAllSprites();
         this.runSprite.visible = true;
-        this.idleSprite.visible = false;
-        this.jumpSprite.visible = false;
-        this.punchSprite.visible = false;
+        // this.idleSprite.visible = false;
+        // this.jumpSprite.visible = false;
+        // this.punchSprite.visible = false;
         this.runSprite.play();
         this.isMoving = true;
 
@@ -178,9 +203,10 @@ export class Player extends Container {
             this.isJumping = true;
             this.velocityY = this.jumpForce;
 
-             this.idleSprite.visible = false;
-             this.runSprite.visible = false;
-             this.punchSprite.visible = false;
+            //  this.idleSprite.visible = false;
+            //  this.runSprite.visible = false;
+            //  this.punchSprite.visible = false;
+            this.hideAllSprites();
 
              this.jumpSprite.play();
              this.jumpSprite.visible = true;
@@ -195,9 +221,10 @@ export class Player extends Container {
         this.isAttacking = true;
         this.attackType = type;
 
-        this.idleSprite.visible = false;
-        this.runSprite.visible  = false;
-        this.jumpSprite.visible = false;
+        // this.idleSprite.visible = false;
+        // this.runSprite.visible  = false;
+        // this.jumpSprite.visible = false;
+        this.hideAllSprites();
        // console.log(this.idleSprite);
         
 
@@ -220,7 +247,7 @@ export class Player extends Container {
             attackSprite.scale.set(Math.abs(attackSprite.scale.x) * direction, attackSprite.scale.y);
 
             let time: number = 300; // Mặc định là 500ms
-            if (type == "kame1") time = 1200;
+            if (type == "kame1") time = 1000;
             setTimeout(()=>{
                 attackSprite.stop();
                 attackSprite.visible = false;
@@ -231,32 +258,18 @@ export class Player extends Container {
                 // if(type=="kame1") time = 1000;
             },time);
         }
+    }
+
+    onCollision(){
+        console.log("hi");
         
-
-        // const attackSprite:  AnimatedSprite | null = null;
-
-        // if(attackSprite){
-        //     attackSprite.visible = true;
-        // }
-
-        // if(!this.isPunch){
-        //     this.isPunch = true;
-
-        //     this.idleSprite.visible = false;
-        //     this.runSprite.visible  = false;
-        //     this.jumpSprite.visible = false;
-
-        //     this.punchSprite.play();
-        //     this.punchSprite.visible = true;
-        //     this.punchSprite.gotoAndPlay(0);
-
-        //     this.punchSprite.scale.set(Math.abs(this.punchSprite.scale.x) * direction, this.punchSprite.scale.y);
-        // }
-      //  this.isPunch = false
     }
 
     public update(delta: number) {
-        
+         // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        this.collider = new RectCollider(this.x,this.y,32,32, (other: Collider) => {} );
+        this.collisionManager.addCollider(this.collider);
+      //  console.log(this.collider);
         if(this.x<=0){
             //console.log();
             this.speed = 0;
@@ -264,11 +277,21 @@ export class Player extends Container {
         } else {
             // Xử lý trọng lực
             this.speed = 2;
-        if(this.isMoving){
-            this.x += this.direction*this.speed*delta;
-          // console.log(this.parent.w);
-           
+       if (this.isMoving) {
+            const screenMid = this.app.screen.width / 2;
+            //const mapEndOffset = 100;
+         //   const mapRightEdge = this.mapWidth - this.app.screen.width - mapEndOffset;
+            
+            // Nếu nhân vật chưa đến giữa màn hình hoặc map đã cuộn hết, chỉ di chuyển nhân vật
+            if (this.x < screenMid - 150) {
+                this.x += this.direction * this.speed * delta;
+            } else {
+                // Nếu map chưa cuộn hết, di chuyển cả map và nhân vật
+                this.parent.x -= this.direction * this.speed * delta;
+                this.x += this.direction * this.speed * delta;
+            }
         }
+
         
         if (this.isJumping) {
             this.y += this.velocityY * delta;
@@ -279,7 +302,7 @@ export class Player extends Container {
                 this.velocityY = 0;
             }
         }
-        }
-        
+        }      
     }
+    
 }

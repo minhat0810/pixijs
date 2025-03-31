@@ -1,10 +1,13 @@
-import {  Application, Assets, Container, Rectangle, Sprite, Texture } from "pixi.js";
-
+import { Application, Assets, Container, Rectangle, Sprite, Texture } from "pixi.js";
+import { CollisionManager } from "../handle/CollisionManager";
+import RectCollider from "../handle/RectCollider";
 
 interface LayerData {
   data: number[];
   width: number;
   height: number;
+  image: string;
+  offsety: number;
 }
 
 interface TilesetData {
@@ -21,146 +24,154 @@ interface MapData {
   height: number;
   tilewidth: number;
   tileheight: number;
-//   layers: number[];
-//   tilesets: number[];
   layers: LayerData[];
   tilesets: TilesetData[];
 }
 
-export class MapRenderer extends Container{
-    private app : Application;
-    // private container: Container;
-    private tileSize: number = 16;
-    private  sprite! : Sprite;
-    private  tilesMap! : Sprite;
-    constructor(app: Application){
-      super();
-         this.app = app;
-         console.log(app.screen.width , app.screen.height);
-         
-        // this.container = new Container();
-        // this.app.stage.addChild(this.container);'
-    }
+export class MapRenderer extends Container {
+  private app: Application;
+  private collisionManager: CollisionManager;
+  
+  private tileSize: number = 16;
+  private cameraX: number = 0;
+  private cameraY: number = 0;
+  private screenWidth: number;
+  private screenHeight: number;
+  //public  mapWidth!    : number;
 
-    async loadMap(mapFile: string){
-       // console.log(mapFile);
-        
-        try{
-          
-            const reponse = await fetch(mapFile);
-            const mapData = await reponse.json();
+  private tilesetTextures: Texture[] = [];
+  private mapData!: MapData;
+  private background!: Sprite;
+  public  mapWidth!  :number;
 
-            // const imgMap = mapData.tilesets[0].source;
-            // const reponseMap = await fetch(`/assets/maps/${imgMap}`);
-            // const mapImg    = await reponseMap.json();
-            // console.log(mapImg.name);
-            
-            this.renderMap(mapData);
-        } catch (error){
-            console.log(error);
-            
-        }
-    }
+  constructor(app: Application, collisionManager: CollisionManager) {
+    super();
+    this.app = app;
+    this.collisionManager = collisionManager;
+    this.screenWidth = app.screen.width;
+    this.screenHeight = app.screen.height;
+  }
 
-   async renderMap(mapData : MapData){
-        
-        const imgFile = mapData.tilesets[0].source;
-        const reponse = await fetch(`/assets/maps/${imgFile}`);
-        const imgJson = await reponse.json();
-
-        const tileset = mapData.tilesets[0]; 
-        const texture = await Assets.load(`/assets/maps/${imgJson.image}`);
-        // console.log(texture);
-        this.tilesMap = new Sprite(texture);
-        // this.tilesMap.x = 400;
-        // this.tilesMap.y = 400;
-        // // this.tilesMap.anchor.set(1)
-        // this.addChild(this.tilesMap);
-
-        const tileWidth = mapData.tilewidth;
-        const tilesetTextures: Texture[] = [];
-        const tileHeight = mapData.tileheight;
-        const tilesetColumns = imgJson.imagewidth / tileWidth;
-        const tilesetRows = imgJson.imageheight / tileHeight;
-       // console.log(mapData);
-        for (let x = 0; x < tilesetColumns ; x++){        
-          for(let y = 0; y < tilesetRows ; y++){
-              const frame = new Rectangle(x*tileWidth, y* tileHeight, tileWidth, tileHeight);
-              texture.frame = frame;
-              // console.log(texture.orig.width);
-              texture.orig.width = 16;
-              texture.orig.height = 16;
-              const tileTexture = new Texture(texture);
-              tilesetTextures.push(tileTexture);
-          }
-        }
-      //  console.log(tilesetTextures[0]);
-        const tile = new Sprite(tilesetTextures[0]);
-        
-        tile.x = 0;
-        console.log(this.app.screen.height);
-        
-       // tile.y = this.app.screen.height-150;
-        
-        
-        this.addChild(tile)
-        
-        //console.log(mapData);
+  async loadMap(mapFile: MapData) {   
+    try {
+    //   const response = await fetch(mapFile);
+    //   this.mapData = await response.json();
+    // //  console.log(this.mapData);
+      this.mapData = mapFile;
       
-        //   mapData.layers.forEach((layer) => {
-        //   for (let y = 0; y < layer.height; y++) {
-        //     for (let x = 0; x < layer.width; x++) {
-        //         const tileIndex = layer.data[y*layer.width+x] - tileset.firstgid;
-                
-        //         if(tileIndex < 0 ) continue;
+       this.mapWidth = this.mapData.width * this.mapData.tilewidth;
+       this.width = this.mapWidth;
+ //     console.log(mapFile);
+      
+      
+      await this.loadTileset();
+      await this.loadBackground();
+      this.renderMap();
+    } catch (error) {
+      console.error("Lỗi tải bản đồ:", error);
+    }
+  }
 
-        //         const tileSprite = new Sprite(tilesetTextures[tileIndex])
-        //        // 
-        //         tileSprite.x = 400;
-        //         tileSprite.y = 400;
-        //         console.log(tileSprite);
-        //         this.addChild(tileSprite)
-        //         this.addChild(this.tilesMap);
-                
-        //     }
-        //   }
-        //  });
-      //    console.log(this.tilesMap);
-        
-        
-        
-      //  this.container.removeChildren();
-        //  console.log(mapData);
-        //  const {width,height,tilewidth,tileheight,layers,tilesets} = mapData;
-        //  console.log(width,height,tilewidth,tileheight,layers,tilesets);
-        // console.log(tilesets[0]);
-        // const source  = tilesets[0].source;
-        // console.log(source);
-        // const tileTexture = Texture.from(`assets/maps/Multi_Platformer_Tileset_Free/GrassLand/Terrain/${[source]}`);
-        //  const tileTexture = Texture.from(`tilesets${`[0]`}.source`);
-       // console.log(tileTexture);
-        
-       // console.log(mapData.tilesets[1]);
-       
-        //  for (let x = 0; x < width; x++) {
-        //     for (let y = 0; y < height; y++) {
-        //         const tileIndex = y * width + x;'
-        //       // console.log(layers[2]);
-               
-                 
-                
-        //         //  const tileId = tilesets[tileIndex];
-                
-        //         //   console.log(tileId);
-        //         // if(tileId != 0){
-        //         //     const tile = Sprite.from(`/assets/tiles/tile_${tileId}.png`);
-        //         //     tile.x = x*this.tileSize;
-        //         //     tile.y = y*this.tileSize;
-        //         //     this.container.addChild(tile);
-        //         // }
-        //     }   
-        //  }
-    }     
-} 
+  async loadBackground() {
+    const textureBgr = await Assets.load(`/assets/image/${this.mapData.layers[0].image}`);
+    this.background = new Sprite(textureBgr);
+    this.background.y = this.mapData.layers[0].offsety;
+    this.addChild(this.background); 
+  }
 
 
+  async loadTileset() {
+    const imgFile = this.mapData.tilesets[0].source;
+    const response = await fetch(`/assets/maps/${imgFile}`);
+    const imgJson = await response.json();
+    const texture = await Assets.load(`/assets/maps/${imgJson.image}`);
+  
+
+    const tileWidth = this.mapData.tilewidth;
+    const tileHeight = this.mapData.tileheight;
+    const tilesetColumns = imgJson.imagewidth / tileWidth;
+    const tilesetRows = imgJson.imageheight / tileHeight;
+    this.tilesetTextures = [];
+
+    for (let y = 0; y < tilesetRows; y++) {        
+      for (let x = 0; x < tilesetColumns; x++) {
+        const frame = new Rectangle(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
+        texture.frame = frame;
+        texture.orig.width = tileWidth;
+        texture.orig.height = tileHeight;
+        const tileTexture = new Texture(texture);
+        this.tilesetTextures.push(tileTexture);
+      }
+    }
+  }
+
+  renderMap() {
+    this.removeChildren();
+    //this.addChild(this.background);
+    if (this.background) {
+     this.addChild(this.background);
+    }
+
+    if (!this.mapData) return;
+
+    this.mapData.layers.forEach(layer => {
+      const tileWidth = this.mapData.tilewidth;
+      const tileHeight = this.mapData.tileheight;
+
+      // Xác định vùng cần vẽ theo camera
+      const startX = Math.max(0, Math.floor(this.cameraX / tileWidth));
+      const startY = Math.max(0, Math.floor(this.cameraY / tileHeight));
+      const endX = Math.min(layer.width, startX + Math.ceil(this.screenWidth / tileWidth) + 1);
+      const endY = Math.min(layer.height, startY + Math.ceil(this.screenHeight / tileHeight) + 1);
+     // console.log(endX);
+      
+    if(endX != 0 && endY != 0){
+      for (let y = startY; y < endY; y++) {
+        for (let x = startX; x < endX; x++) {
+          const tileIndex = layer.data[y * layer.width + x];
+          if (tileIndex < 1 || tileIndex == 86) continue;
+
+          const tileSprite = new Sprite(this.tilesetTextures[tileIndex]);
+          tileSprite.x = x * tileWidth - this.cameraX;
+          tileSprite.y = y * tileHeight - this.cameraY;
+          
+          this.addChild(tileSprite);
+
+          const collider = new RectCollider(tileSprite.x, tileSprite.y, tileWidth, tileHeight, () => {
+            console.log("Player va chạm với tile!");
+          });
+          this.collisionManager.addCollider(collider);
+        }
+      }
+    }
+    });
+    
+  }
+
+  setCameraPosition(playerX: number, playerY: number) {
+    if (!this.background || !this.mapData) return;
+
+   // const mapWidth = this.mapData.width * this.mapData.tilewidth;
+   // const mapHeight = this.mapData.height * this.mapData.tileheight;
+// console.log(this.mapData.width );
+  //console.log(this.mapWidth);
+    
+    this.cameraX = Math.min(
+        Math.max(playerX - this.screenWidth / 2, 0),
+        this.mapWidth - this.screenWidth
+    );
+
+    // this.cameraY = Math.min(
+    //     Math.max(playerY - this.screenHeight / 2, 0),
+    //     mapHeight - this.screenHeight
+    // );
+    this.cameraY = playerY-this.screenHeight/2;
+    this.renderMap();
+}
+  getXmap(){
+    //  if (!this.background || !this.mapData) return;
+    // console.log(this.mapData);
+    
+    return this.mapWidth;
+  }
+}

@@ -4,6 +4,7 @@ import { MainScene } from "./MainScene";
 import { Player } from "../model/Player";
 import { InputController } from "../handle/InputController";
 import { MapRenderer } from "../model/Map";
+import { CollisionManager } from "../handle/CollisionManager";
 
 export class GameScene extends MainScene {
     private idleSprite! : Sprite;
@@ -11,27 +12,45 @@ export class GameScene extends MainScene {
     private isMoving    : boolean = false;
     private speed       : number = 5;
     private direction   : number = 1;
-    private player      : Player;
+    private player!      : Player;
     private input       : InputController;
 
-    private mapRenderer! : MapRenderer;
+    private mapRenderer : MapRenderer;
+    private collisionManager: CollisionManager;
 
     constructor() {
         super();
         //console.log(this.app.screen.width);
-        this.player = new Player(this.app);
+        this.collisionManager = new CollisionManager();
+        
         this.input = new InputController();
-        this.init();
+        this.mapRenderer = new MapRenderer(this.app , this.collisionManager);
+
+         this.init();
+        //console.log(this.mapRenderer.width);
+        
+       
+       //
+      //      console.log(this.mapRenderer.getXmap());
+        
+       
+        //console.log(this.app.screen.width);
         
     }
 
    private async init() {
+             
             this.width = this.app.screen.width;
             this.height = this.app.screen.height    
-            this.mapRenderer = new MapRenderer(this.app);
-            this.mapRenderer.loadMap("/assets/maps/map_level_1.json")
-            this.addChild(this.player);
+          //  this.mapRenderer.loadMap("/assets/maps/map_level_1.json");
+            const response = await fetch("/assets/maps/map_level_1.json");
+            const data     = await response.json();
+            this.mapRenderer.loadMap(data);
+            this.player = new Player(this.app ,this.collisionManager,data.width * data.tilewidth);
+
             this.addChild(this.mapRenderer);
+            this.addChild(this.player);
+            this.collisionManager.addCollider(this.player.collider);
             this.app.ticker.add((ticker)=>this.update(ticker.deltaTime));
 
   }
@@ -39,6 +58,9 @@ export class GameScene extends MainScene {
 
 
     update(delta: number) {
+     //
+     if(!this.player) return;
+    // this.collisionManager.checkCollisions();
      if (!this.player.runSprite) return;
      if(this.player.isAttacking) return;
         
@@ -70,6 +92,8 @@ export class GameScene extends MainScene {
         }
 
        this.player.update(delta);
+      // console.log(this.player.x , this.player.y);
+       this.mapRenderer.setCameraPosition(this.player.x, this.player.y);
     } 
     
 }
