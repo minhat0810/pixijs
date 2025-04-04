@@ -107,6 +107,8 @@ export class MapRenderer extends Container {
 
   renderMap() {
     this.removeChildren();
+    //console.log(this.app.screen.width);
+    
     //this.addChild(this.background);
     if (this.background) {
      this.addChild(this.background);
@@ -121,8 +123,11 @@ export class MapRenderer extends Container {
       // Xác định vùng cần vẽ theo camera
       const startX = Math.max(0, Math.floor(this.cameraX / tileWidth));
       const startY = Math.max(0, Math.floor(this.cameraY / tileHeight));
-      const endX = Math.min(layer.width, startX + Math.ceil(this.screenWidth / tileWidth) + 1);
+  
+      
+      const endX = Math.min(layer.width, startX + Math.ceil(this.screenWidth / tileWidth) + 7);
       const endY = Math.min(layer.height, startY + Math.ceil(this.screenHeight / tileHeight) + 1);
+     //     console.log(endX);
      // console.log(endX);
       
     if(endX != 0 && endY != 0){
@@ -138,8 +143,10 @@ export class MapRenderer extends Container {
           this.addChild(tileSprite);
 
           const collider = new RectCollider(tileSprite.x, tileSprite.y, tileWidth, tileHeight, () => {
-            console.log("Player va chạm với tile!");
+           // console.log("Player va chạm với tile!");
           });
+          //console.log(collider);
+          
           this.collisionManager.addCollider(collider);
         }
       }

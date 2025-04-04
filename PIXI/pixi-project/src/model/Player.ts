@@ -240,7 +240,7 @@ export class Player extends Container {
 
         if(attackSprite){
             attackSprite.visible = true;
-            attackSprite.gotoAndStop(0);
+            attackSprite.gotoAndPlay(0);
             attackSprite.loop = false;
            // attackSprite.currentFrame = 0;
             attackSprite.play();
@@ -266,6 +266,8 @@ export class Player extends Container {
     }
 
     public update(delta: number) {
+      //  console.log(this.mapWidth);
+        
          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         this.collider = new RectCollider(this.x,this.y,32,32, (other: Collider) => {} );
         this.collisionManager.addCollider(this.collider);
@@ -277,20 +279,100 @@ export class Player extends Container {
         } else {
             // Xử lý trọng lực
             this.speed = 2;
-       if (this.isMoving) {
-            const screenMid = this.app.screen.width / 2;
-            //const mapEndOffset = 100;
-         //   const mapRightEdge = this.mapWidth - this.app.screen.width - mapEndOffset;
-            
-            // Nếu nhân vật chưa đến giữa màn hình hoặc map đã cuộn hết, chỉ di chuyển nhân vật
-            if (this.x < screenMid - 150) {
-                this.x += this.direction * this.speed * delta;
-            } else {
-                // Nếu map chưa cuộn hết, di chuyển cả map và nhân vật
-                this.parent.x -= this.direction * this.speed * delta;
-                this.x += this.direction * this.speed * delta;
+        if (this.isMoving) {
+        // Lệch giữa màn hình một chút để tạo cảm giác thoáng
+        const screenMid = this.direction === 1? this.app.screen.width / 2 - 150 : this.app.screen.width / 2 + 150 ;
+
+        const mapEndOffset = 80;
+
+        // Tính vị trí của player trên màn hình (so với camera/map)
+        const globalPlayerX = this.x - this.parent.x;
+
+        // Giới hạn cuộn map
+        const minParentX = -(this.mapWidth - this.app.screen.width - mapEndOffset); // Cuộn hết về phải
+        const maxParentX = 0; // Gốc bên trái
+
+        // Di chuyển sang phải
+            const moveAmount = this.direction * this.speed * delta;
+
+            if (this.direction > 0) {
+                if (globalPlayerX < screenMid) {
+                    this.x += moveAmount;
+                } else if (this.parent.x > minParentX) {
+                    this.parent.x -= moveAmount;
+                    this.x += moveAmount;
+                    if (this.parent.x < minParentX) this.parent.x = minParentX;
+                } else {
+                    this.x += moveAmount;
+                }
             }
+
+            if (this.direction < 0) {
+                if (globalPlayerX > screenMid) {
+                    this.x += moveAmount;
+                } else if (this.parent.x < maxParentX) {
+                    this.parent.x -= moveAmount;
+                    this.x += moveAmount;
+                    if (this.parent.x > maxParentX) this.parent.x = maxParentX;
+                } else {
+                    this.x += moveAmount;
+                }
+            }
+
+
+
+           // console.log(globalPlayerX);
+        //    if(this.direction == 1){
+                // if (globalPlayerX < screenMid - 150  ) {
+                //         console.log(this.parent.x);        
+                //         this.x += this.direction * this.speed * delta;
+                //        // console.log(this.x);
+                        
+                // }else{
+                    
+                //     this.parent.x -= this.direction * this.speed * delta;
+                //     this.x += this.direction * this.speed * delta;
+                // }
+                // console.log(this.parent.x);
+                
+         //   }
+            
+            // else {
+            //         this.parent.x -= this.direction * this.speed * delta;
+            //         
+               
+            // }
+            
+        //       const globalPlayerX = this.x - this.parent.x;
+        //       console.log(globalPlayerX);
+        //         // Nếu nhân vật chưa đến giữa màn hình hoặc map đã cuộn hết
+        //       if (this.direction > 0) {
+        // // Nếu nhân vật chưa đến giữa màn hình hoặc map đã cuộn hết
+        //         if (globalPlayerX < screenMid  || -this.parent.x + this.app.screen.width >= this.mapWidth - mapEndOffset) {
+        //             // Nếu nhân vật chưa chạm mép phải của map
+        //             if (globalPlayerX + this.speed * delta < this.mapWidth) {
+        //                 this.x += this.direction * this.speed * delta;
+        //             }
+        //         } else {
+        //             // Nếu map chưa cuộn hết bên phải
+        //             if (-this.parent.x + this.app.screen.width < this.mapWidth - mapEndOffset) {
+        //                 this.parent.x -= this.direction * this.speed * delta;
+        //             }
+        //         }
+        //     }
+        //        if (this.direction < 0) {
+        //             if (globalPlayerX > screenMid + 150 || this.parent.x >= 0) {
+        //                 if (globalPlayerX - this.speed * delta > 0) {
+        //                     this.x += this.direction * this.speed * delta;
+        //                 }
+        //             } else {
+        //                 if (this.parent.x < 0) {
+        //                     this.parent.x -= this.direction * this.speed * delta;
+        //                 }
+        //             }
+        //         }
         }
+
 
         
         if (this.isJumping) {
