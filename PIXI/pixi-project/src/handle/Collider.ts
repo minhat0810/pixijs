@@ -1,35 +1,3 @@
-
-// export class Collider{
-//     public x            : number;
-//     public y            : number;
-//     public width    : number;
-//     public height   : number;
-//     public onCollide    : (other: Collider) => void;
-//     public isColliding  ; 
-//     constructor(x: number,y: number , width: number, height: number, onCollide: (other: Collider) => void
-//     ){
-//         this.x = x;
-//         this.y = y;
-//         this.onCollide  = onCollide;
-//         this.isColliding = false;
-//         this.width = width;
-//         this.height = height;
-//     }
-
-//     checkCollision(other: Collider){
-//         throw new Error("checkCollision() must be implemented in a subclass")
-//         console.log(other);
-        
-//     }
-//     onCollision(other: Collider){
-//         if(!this.isColliding){
-//             this.isColliding = true;
-//             this.onCollide?.(other);
-//         }
-//     }
-// }
-
-
 export class Collider {
     public x: number;
     public y: number;

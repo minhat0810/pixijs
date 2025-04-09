@@ -58,8 +58,9 @@ export class GameScene extends MainScene {
 
 
     update(delta: number) {
-     //
+
      if(!this.player) return;
+     if (document.hidden) return;
     // this.collisionManager.checkCollisions();
      if (!this.player.runSprite) return;
      if(this.player.isAttacking) return;

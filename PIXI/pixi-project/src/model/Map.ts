@@ -44,6 +44,10 @@ export class MapRenderer extends Container {
   private background!: Sprite;
   public  mapWidth!  :number;
 
+    // Cache các sprite của tile và collider theo vị trí [y][x]
+  private tileSprites: Sprite[][] = [];
+  private tileColliders: RectCollider[][] = [];
+
   constructor(app: Application, collisionManager: CollisionManager) {
     super();
     this.app = app;
@@ -101,63 +105,90 @@ export class MapRenderer extends Container {
         texture.orig.height = tileHeight;
         const tileTexture = new Texture(texture);
         this.tilesetTextures.push(tileTexture);
+  //      console.log(tileTexture);
+        
       }
     }
   }
 
-  renderMap() {
-    this.removeChildren();
-    //console.log(this.app.screen.width);
-    
-    //this.addChild(this.background);
-    if (this.background) {
-     this.addChild(this.background);
+renderMap() {
+  this.removeChildren();
+  if (this.background) this.addChild(this.background);
+  if (!this.mapData) return;
+
+  const tileWidth = this.mapData.tilewidth;
+  const tileHeight = this.mapData.tileheight;
+
+  this.mapData.layers.forEach(layer => {
+    const startX = Math.max(0, Math.floor(this.cameraX / tileWidth));
+    const startY = Math.max(0, Math.floor(this.cameraY / tileHeight));
+    const endX = Math.min(layer.width, startX + Math.ceil(this.screenWidth / tileWidth) + 1);
+    const endY = Math.min(layer.height, startY + Math.ceil(this.screenHeight / tileHeight) + 1);
+
+    for (let y = 0; y < layer.height; y++) {
+      for (let x = 0; x < layer.width; x++) {
+        const sprite = this.tileSprites[y]?.[x];
+        if (sprite) sprite.visible = false;
+      }
     }
 
-    if (!this.mapData) return;
+    for (let y = startY; y < endY; y++) {
+      for (let x = startX; x < endX; x++) {
+        const tileIndex = layer.data[y * layer.width + x];
+        if (tileIndex < 1 || tileIndex == 86) continue;
 
-    this.mapData.layers.forEach(layer => {
-      const tileWidth = this.mapData.tilewidth;
-      const tileHeight = this.mapData.tileheight;
+        if (!this.tileSprites[y]) this.tileSprites[y] = [];
+        let tileSprite: Sprite;
+      //  const newTexture = this.tilesetTextures[tileIndex];
 
-      // Xác định vùng cần vẽ theo camera
-      const startX = Math.max(0, Math.floor(this.cameraX / tileWidth));
-      const startY = Math.max(0, Math.floor(this.cameraY / tileHeight));
-  
-      
-      const endX = Math.min(layer.width, startX + Math.ceil(this.screenWidth / tileWidth) + 7);
-      const endY = Math.min(layer.height, startY + Math.ceil(this.screenHeight / tileHeight) + 1);
-     //     console.log(endX);
-     // console.log(endX);
-      
-    if(endX != 0 && endY != 0){
-      for (let y = startY; y < endY; y++) {
-        for (let x = startX; x < endX; x++) {
-          const tileIndex = layer.data[y * layer.width + x];
-          if (tileIndex < 1 || tileIndex == 86) continue;
 
-          const tileSprite = new Sprite(this.tilesetTextures[tileIndex]);
+        if (!this.tileSprites[y][x]) {
+          tileSprite = new Sprite(this.tilesetTextures[tileIndex]);
+          tileSprite.anchor.set(0);
           tileSprite.x = x * tileWidth - this.cameraX;
           tileSprite.y = y * tileHeight - this.cameraY;
-          
+          this.tileSprites[y][x] = tileSprite;
           this.addChild(tileSprite);
-
-          const collider = new RectCollider(tileSprite.x, tileSprite.y, tileWidth, tileHeight, () => {
-           // console.log("Player va chạm với tile!");
-          });
-          //console.log(collider);
+         // this.tileSprites[y][x] = tileSprite;
+          console.log(tileSprite);
           
-          this.collisionManager.addCollider(collider);
+        } else {
+             tileSprite = this.tileSprites[y][x];
+             console.log(tileSprite);
+             
+
+        // // Nếu texture giống nhau thì không cần set lại
+        //     if (tileSprite.texture.baseTexture.uid === newTexture.baseTexture.uid) {
+        //       tileSprite.x = x * tileWidth - this.cameraX;
+        //       tileSprite.y = y * tileHeight - this.cameraY;
+        //       tileSprite.visible = true;
+        //       continue;
+        //     }
+
+
+        //     // Cập nhật lại nếu khác texture
+        //     tileSprite.texture = newTexture;
+        //     tileSprite.x = x * tileWidth - this.cameraX;
+        //     tileSprite.y = y * tileHeight - this.cameraY;
+        //     tileSprite.visible = true;
+        //     console.log(tileSprite);
+      //  console.log("hi");
+         tileSprite = new Sprite(this.tilesetTextures[tileIndex]);
+          tileSprite.anchor.set(0);
+          tileSprite.x = x * tileWidth - this.cameraX;
+          tileSprite.y = y * tileHeight - this.cameraY;
+          this.tileSprites[y][x] = tileSprite;
+          this.addChild(tileSprite);
         }
       }
     }
-    });
-    
-  }
+  });
+}
+
 
   setCameraPosition(playerX: number, playerY: number) {
     if (!this.background || !this.mapData) return;
-
+    
    // const mapWidth = this.mapData.width * this.mapData.tilewidth;
    // const mapHeight = this.mapData.height * this.mapData.tileheight;
 // console.log(this.mapData.width );

@@ -280,12 +280,10 @@ export class Player extends Container {
             // Xử lý trọng lực
             this.speed = 2;
         if (this.isMoving) {
-        // Lệch giữa màn hình một chút để tạo cảm giác thoáng
         const screenMid = this.direction === 1? this.app.screen.width / 2 - 150 : this.app.screen.width / 2 + 150 ;
 
         const mapEndOffset = 80;
 
-        // Tính vị trí của player trên màn hình (so với camera/map)
         const globalPlayerX = this.x - this.parent.x;
 
         // Giới hạn cuộn map
@@ -296,7 +294,12 @@ export class Player extends Container {
             const moveAmount = this.direction * this.speed * delta;
 
             if (this.direction > 0) {
-                if (globalPlayerX < screenMid) {
+        //        console.log(globalPlayerX);
+                
+               if(globalPlayerX >= this.mapWidth-110){
+                    this.speed = 0;
+               } else {
+                 if (globalPlayerX < screenMid) {
                     this.x += moveAmount;
                 } else if (this.parent.x > minParentX) {
                     this.parent.x -= moveAmount;
@@ -305,10 +308,11 @@ export class Player extends Container {
                 } else {
                     this.x += moveAmount;
                 }
+               }
             }
 
             if (this.direction < 0) {
-                if (globalPlayerX > screenMid) {
+                if (globalPlayerX > screenMid  + 300) {
                     this.x += moveAmount;
                 } else if (this.parent.x < maxParentX) {
                     this.parent.x -= moveAmount;
@@ -318,63 +322,9 @@ export class Player extends Container {
                     this.x += moveAmount;
                 }
             }
-
-
-
-           // console.log(globalPlayerX);
-        //    if(this.direction == 1){
-                // if (globalPlayerX < screenMid - 150  ) {
-                //         console.log(this.parent.x);        
-                //         this.x += this.direction * this.speed * delta;
-                //        // console.log(this.x);
-                        
-                // }else{
-                    
-                //     this.parent.x -= this.direction * this.speed * delta;
-                //     this.x += this.direction * this.speed * delta;
-                // }
-                // console.log(this.parent.x);
-                
-         //   }
-            
-            // else {
-            //         this.parent.x -= this.direction * this.speed * delta;
-            //         
-               
-            // }
-            
-        //       const globalPlayerX = this.x - this.parent.x;
-        //       console.log(globalPlayerX);
-        //         // Nếu nhân vật chưa đến giữa màn hình hoặc map đã cuộn hết
-        //       if (this.direction > 0) {
-        // // Nếu nhân vật chưa đến giữa màn hình hoặc map đã cuộn hết
-        //         if (globalPlayerX < screenMid  || -this.parent.x + this.app.screen.width >= this.mapWidth - mapEndOffset) {
-        //             // Nếu nhân vật chưa chạm mép phải của map
-        //             if (globalPlayerX + this.speed * delta < this.mapWidth) {
-        //                 this.x += this.direction * this.speed * delta;
-        //             }
-        //         } else {
-        //             // Nếu map chưa cuộn hết bên phải
-        //             if (-this.parent.x + this.app.screen.width < this.mapWidth - mapEndOffset) {
-        //                 this.parent.x -= this.direction * this.speed * delta;
-        //             }
-        //         }
-        //     }
-        //        if (this.direction < 0) {
-        //             if (globalPlayerX > screenMid + 150 || this.parent.x >= 0) {
-        //                 if (globalPlayerX - this.speed * delta > 0) {
-        //                     this.x += this.direction * this.speed * delta;
-        //                 }
-        //             } else {
-        //                 if (this.parent.x < 0) {
-        //                     this.parent.x -= this.direction * this.speed * delta;
-        //                 }
-        //             }
-        //         }
         }
 
 
-        
         if (this.isJumping) {
             this.y += this.velocityY * delta;
             this.velocityY += this.gravity * delta;
