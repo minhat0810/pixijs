@@ -4,12 +4,12 @@
  "layers":[
         {
          "id":2,
-         "image":"..\/image\/brgmap\/bgrm1.webp",
-         "imageheight":864,
-         "imagewidth":1536,
+         "image":"..\/image\/brgmap\/map2.jpeg",
+         "imageheight":900,
+         "imagewidth":2234,
          "name":"Image Layer 1",
-         "offsetx":25.3333333333333,
-         "offsety":-133.333333333333,
+         "offsetx":152.606060606061,
+         "offsety":-169.696969696969,
          "opacity":1,
          "repeatx":true,
          "type":"imagelayer",

@@ -8,17 +8,17 @@ export class MainScene extends Container{
         this.app = SceneManager.getApp();
       //  console.log(this.app.screen.width , this.app.screen.height);
         
-        this.resize();
+        // this.resize();
         
-        window.addEventListener("resize", () => this.resize());
+        // window.addEventListener("resize", () => this.resize());
     }
 
 
-     private resize() {
-         if (!this.app?.screen) return;
-        this.app.renderer.resize(window.innerWidth, window.innerHeight);
-    //    console.log(`Updated screen size: ${this.width} x ${this.height}`);
-    }
+    //  private resize() {
+    //      if (!this.app?.screen) return;
+    //     this.app.renderer.resize(window.innerWidth, window.innerHeight);
+    // //    console.log(`Updated screen size: ${this.width} x ${this.height}`);
+    // }
 
     
     // public destroy(options?: any) {

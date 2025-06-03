@@ -1,5 +1,5 @@
 
-import { AnimatedSprite, Sprite } from "pixi.js";
+import { AnimatedSprite, Assets, Sprite } from "pixi.js";
 import { MainScene } from "./MainScene";
 import { Player } from "../model/Player";
 import { InputController } from "../handle/InputController";
@@ -12,7 +12,7 @@ export class GameScene extends MainScene {
     private isMoving    : boolean = false;
     private speed       : number = 5;
     private direction   : number = 1;
-    private player!      : Player;
+    private player!     : Player;
     private input       : InputController;
 
     private mapRenderer : MapRenderer;
@@ -23,79 +23,82 @@ export class GameScene extends MainScene {
         //console.log(this.app.screen.width);
         this.collisionManager = new CollisionManager();
         
-        this.input = new InputController();
-        this.mapRenderer = new MapRenderer(this.app , this.collisionManager);
+        this.input            = new InputController();
+        this.mapRenderer      = new MapRenderer(this.app , this.collisionManager);
 
          this.init();
-        //console.log(this.mapRenderer.width);
-        
-       
-       //
-      //      console.log(this.mapRenderer.getXmap());
-        
-       
-        //console.log(this.app.screen.width);
-        
     }
 
    private async init() {
              
-            this.width = this.app.screen.width;
-            this.height = this.app.screen.height    
-          //  this.mapRenderer.loadMap("/assets/maps/map_level_1.json");
-            const response = await fetch("/assets/maps/map_level_1.json");
-            const data     = await response.json();
-            this.mapRenderer.loadMap(data);
-            this.player = new Player(this.app ,this.collisionManager,data.width * data.tilewidth);
-
+            this.width    = this.app.screen.width;
+            this.height   = this.app.screen.height    
+            const mapData = Assets.get('map_level_1');
+            await this.mapRenderer.loadMap(mapData);
+            
+            this.player   = new Player(this.app ,this.collisionManager,mapData);
+            
+            //this.player = new Player(this.app ,this.collisionManager,data.width * data.tilewidth);
             this.addChild(this.mapRenderer);
             this.addChild(this.player);
-            this.collisionManager.addCollider(this.player.collider);
-            this.app.ticker.add((ticker)=>this.update(ticker.deltaTime));
+            // this.collisionManager.addCollider(this.player.collider);
+            // this.app.ticker.add((ticker)=>this.update(ticker.deltaTime));
 
   }
 
 
-
     update(delta: number) {
 
-     if(!this.player) return;
-     if (document.hidden) return;
-    // this.collisionManager.checkCollisions();
-     if (!this.player.runSprite) return;
-     if(this.player.isAttacking) return;
-        
-        if(this.input.isKeyPressed("ArrowUp") && this.input.isKeyPressed("ArrowRight")){
-            this.player.jump(1);
-        } else 
-        if(this.input.isKeyPressed("ArrowUp") && this.input.isKeyPressed("ArrowLeft")){
-            this.player.jump(-1);
-        } else
-        if(this.input.isKeyPressed("ArrowUp")){
-            this.player.jump(this.player.direction);
-        } else  
-        if(this.input.isKeyPressed("ArrowLeft")){
-            this.player.startMoving(-1);
-        } else 
-        if(this.input.isKeyPressed("ArrowRight")){
-             this.player.startMoving(1);
-        } else
-        if(this.input.isKeyPressed("Enter")){         
-            this.player.attack("punch",this.player.direction);
-        }
-        else
-        if(this.input.isKeyPressed("2")){
-            this.player.attack("kame1",this.player.direction);
-        }
-        else
-         {
-            this.player.stopMoving();
-        }
+        if(!this.player) return;
+        if (document.hidden) return;
+        this.mapRenderer.updateCamera(this.player.x,this.player.y);
+        this.mapRenderer.checkCollision(this.player.x,this.player.y);
+        this.player.update(delta);
+        this.collisionManager.checkCollisions();
+        if (!this.player.runSprite) return;
+        if(this.player.isAttacking) return;
+                
+                if(this.input.isKeyPressed("ArrowUp") && this.input.isKeyPressed("ArrowRight")){
+                        this.player.jump(1);
+                } else 
+                if(this.input.isKeyPressed("ArrowUp") && this.input.isKeyPressed("ArrowLeft")){
+                        this.player.jump(-1);
+                } else
+                if(this.input.isKeyPressed("ArrowUp")){
+                        this.player.jump(this.player.direction);
+                } else  
+                if(this.input.isKeyPressed("ArrowLeft")){
+                        this.player.startMoving(-1);
+                } else 
+                if(this.input.isKeyPressed("ArrowRight")){
+                         this.player.startMoving(1);
+                } else
+                if(this.input.isKeyPressed("Enter") || this.input.isKeyPressed("1")){            
+                        this.player.attack("punch",this.player.direction);
+                }
+                else
+                if(this.input.isKeyPressed("2")){
+                        this.player.attack("kame1",this.player.direction);
+                }
+                else
+                 {
+                        this.player.stopMoving();
+                }
+                
+          // console.log(this.player.x , this.player.y);
+           //this.mapRenderer.checkCollision(this.player)
+        //      this.mapRenderer.setCameraPosition(this.player.x, this.player.y);
+   //       console.log(this.player.x, this.player.y);
+                const nearbyTiles = this.mapRenderer.checkCollision(this.player.x, this.player.y,2);
 
-       this.player.update(delta);
-      // console.log(this.player.x , this.player.y);
-       this.mapRenderer.setCameraPosition(this.player.x, this.player.y);
-    } 
+                // ví dụ: kiểm tra có tile nào không trong suốt
+                nearbyTiles.forEach(tile => {
+                if (tile.visible) {
+                // xử lý va chạm hoặc debug highlight tile
+                console.log(`Tile tại (${tile.col}, ${tile.row}) va chạm.`);
+                }
+                });
+                        } 
     
 }
 
